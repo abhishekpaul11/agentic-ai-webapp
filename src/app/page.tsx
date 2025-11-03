@@ -32,7 +32,7 @@ export default function Page() {
         const res = await fetch("/api/stream", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: input }),
+            body: JSON.stringify({ message: input, namespace: namespace }),
         });
 
         if (!res.body) {
@@ -78,16 +78,17 @@ export default function Page() {
         <main className="mx-auto max-w-2xl p-6 space-y-6">
             <h1 className="text-2xl font-bold">RAG Chatbot (Upload + Streaming)</h1>
 
+            <input
+                className="border rounded px-2 py-1"
+                value={namespace}
+                onChange={(e) => setNamespace(e.target.value)}
+                placeholder="namespace (e.g., kb or user123)"
+            />
+
             <section className="p-4 border rounded space-y-3">
                 <div className="font-semibold">Upload document</div>
-                <input
-                    className="border rounded px-2 py-1"
-                    value={namespace}
-                    onChange={(e) => setNamespace(e.target.value)}
-                    placeholder="namespace (e.g., kb or user123)"
-                />
                 <div className="flex items-center gap-3">
-                    <input ref={fileRef} type="file" accept=".pdf,.md,.txt" />
+                    <input ref={fileRef} type="file" accept=".pdf,.md,.txt"/>
                     <button onClick={uploadDoc} className="bg-black text-white px-3 py-2 rounded">
                         Upload
                     </button>

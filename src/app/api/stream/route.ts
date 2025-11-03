@@ -8,19 +8,19 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export async function POST(req: NextRequest) {
     try {
-        const { message } = await req.json();
+        const { message, namespace = "kb" } = await req.json();
         if (!message || typeof message !== "string") {
             return new Response("Missing 'message'", { status: 400 });
         }
 
-        const hits = await retrieve(message);
+        const hits = await retrieve(message, undefined, namespace);
         const context = hits.map((h, i) => `# Doc ${i + 1} (${h.source})\n${h.text}`).join("\n\n");
 
         const encoder = new TextEncoder();
         const stream = new ReadableStream({
             async start(controller) {
                 try {
-                    const meta = JSON.stringify({ sources: hits.slice(0, 3).map(h => ({ id: h.id, source: h.source, score: h.score })) });
+                    const meta = JSON.stringify({ namespace: namespace, sources: hits.slice(0, 3).map(h => ({ id: h.id, source: h.source, score: h.score })) });
                     controller.enqueue(encoder.encode(`__META__${meta}\n`));
 
                     const system = "You are a helpful assistant. Use the provided context. If not in context, say you don't know.";

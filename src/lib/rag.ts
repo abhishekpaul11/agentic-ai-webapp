@@ -4,10 +4,10 @@ import OpenAI from "openai";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 const GENERATION_MODEL = "gpt-4o-mini";
 
-export async function retrieve(query: string, topK = Number(process.env.RAG_TOP_K || 6)) {
+export async function retrieve(query: string, topK = Number(process.env.RAG_TOP_K || 6), namespace = "kb") {
     const client = pineconeClient();
     const indexName = process.env.PINECONE_INDEX!;
-    const index = client.index(indexName).namespace("kb");
+    const index = client.index(indexName).namespace(namespace);
 
     // embed the query
     const emb = await openai.embeddings.create({
@@ -29,8 +29,8 @@ export async function retrieve(query: string, topK = Number(process.env.RAG_TOP_
     })) ?? [];
 }
 
-export async function answerWithRAG(userQuestion: string) {
-    const hits = await retrieve(userQuestion);
+export async function answerWithRAG(userQuestion: string, namespace = "kb") {
+    const hits = await retrieve(userQuestion, Number(process.env.RAG_TOP_K || 6), namespace);
     const context = hits
         .map((h, i) => `# Doc ${i + 1} (score ${h.score.toFixed(3)}, ${h.source})\n${h.text}`)
         .join("\n\n");
