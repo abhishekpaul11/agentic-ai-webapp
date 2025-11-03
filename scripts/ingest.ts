@@ -6,18 +6,7 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 import fs from "node:fs";
 import { ensureIndex } from "@/lib/pinecone";
 import { embedTexts } from "@/lib/embeddings";
-
-function chunk(text: string, size = 800, overlap = 100) {
-    const chunks: string[] = [];
-    let i = 0;
-    while (i < text.length) {
-        const end = Math.min(i + size, text.length);
-        const slice = text.slice(i, end);
-        chunks.push(slice);
-        i += size - overlap;
-    }
-    return chunks;
-}
+import {chunkText} from "@/lib/chunk";
 
 async function main() {
     const dataDir = path.join(process.cwd(), "data");
@@ -34,7 +23,7 @@ async function main() {
     const allChunks: { id: string; text: string; file: string }[] = [];
     for (const file of files) {
         const full = fs.readFileSync(path.join(dataDir, file), "utf8");
-        const pieces = chunk(full);
+        const pieces = chunkText(full);
         pieces.forEach((p, idx) => {
             allChunks.push({
                 id: `${file}-${idx}`,
