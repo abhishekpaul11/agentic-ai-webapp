@@ -29,7 +29,7 @@ export default function Page() {
         setSources([]);
         setLoading(true);
 
-        const res = await fetch("/api/agent", {
+        const res = await fetch("/api/langchain-agent", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: input, namespace: namespace }),
